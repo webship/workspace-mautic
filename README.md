@@ -152,17 +152,18 @@ builder refuses `--runtime` and builds on DDEV only.
 
 | | DDEV | Docker Compose | Podman | Kubernetes | Lando | Docksal |
 | --- | --- | --- | --- | --- | --- | --- |
-| Build and install, with the default accounts and the sample content | Not yet run | Yes | Not yet run | Not yet run | Not yet run | Not yet run |
-| The pages, and the login of each account in its role | Not yet run | Yes | Not yet run | Not yet run | Not yet run | Not yet run |
-| `cmd-tools-mautic-cli.sh`: what the site is, `--run`, the accounts | Not yet run | Yes | Not yet run | Not yet run | Not yet run | Not yet run |
-| Test users, cancelled and added with the core's tools | Not yet run | Yes | Not yet run | Not yet run | Not yet run | Not yet run |
-| The scheduled tasks beside the web server | Not yet run | Yes, through `rt_daemon` | Not yet run | Not yet run | Not on Lando yet: the tool runs them | Not on Docksal yet: the tool runs them |
-| The mail the site sends, in the runtime's mail catcher | Not yet run | Yes | Not yet run | Not yet run | Not yet run | Not yet run |
-| Export and import the database | Not yet run | Yes | Not yet run | Not yet run | Not yet run | Not yet run |
-| The testing setup and the suite, with the pack's examples | Not yet run | Not yet run | Not yet run | Not yet run | Not yet run | Not yet run |
-| The row in the dashboard, and remove | Not yet run | Not yet run | Not yet run | Not yet run | Not yet run | Not yet run |
+| Build and install, with the default accounts and the sample content | Yes | Yes | No: the stack does not start (webship/workspace#835) | Yes | Yes | Yes |
+| The pages, and the login of each account in its role | Yes | Yes | Not run | Yes | Yes | Yes |
+| `cmd-tools-mautic-cli.sh`: what the site is, `--run`, the accounts | Yes | Yes | Not run | Yes | Yes | Yes |
+| Test users, cancelled and added with the core's tools, and the sample contacts' owners back | Yes | Yes | Not run | Yes | Yes | Yes |
+| The scheduled tasks | Yes, a daemon | Yes, through `rt_daemon` | Not run | Yes, through `rt_daemon` | Not on Lando yet: the tool runs them (`--scheduled-tasks --every 15`), and the suite passes beside it | Not on Docksal yet: the tool runs them (`--scheduled-tasks --every 15`), and the suite passes beside it |
+| The mail the site sends, in the runtime's mail catcher | Yes | Yes | Not run | Yes | Yes | Yes |
+| Export and import the database | Yes | Yes | Not run | Yes | Yes | Yes |
+| The testing setup and the suite, with the pack's features (79 scenarios) | Yes | Yes | Not run | Yes | Yes, with the tool's loop beside it | Yes, with the tool's loop beside it |
+| The row in the dashboard, and remove | Yes | Yes (kept as the review site) | Not run | Yes | Yes | Yes |
 
-"Yes" means it was run on a real site of that runtime, in a throwaway workspace with the core of `1.0.x` after 1.0.30.
+"Yes" means it was run on a real site of that runtime, in a throwaway workspace with the core of `1.0.x` after 1.0.30
+(`rt_daemon`, webship/workspace#825).
 
 | Runtime | The site's address | What the project carries |
 | --- | --- | --- |
@@ -186,7 +187,10 @@ What differs from DDEV:
   `bash cmd-tools-mautic-cli.sh mysite` says which holds for a site.
 - **The suite** runs in the Workspace's tests container, which hands it the site's address (`LAUNCH_URL`) and its
   mailbox (`MAIL_URL`); the testing setup writes no address into `cucumber.js` there.
-- **Not there yet:** HTTPS and a host name are DDEV's (Docksal's own proxy gives a host name, on plain HTTP).
+- **Not there yet:** HTTPS and a host name are DDEV's (Docksal's own proxy gives a host name, on plain HTTP). On
+  Podman the `php` stack of the core does not start on a machine whose `podman compose` hands the file to
+  docker-compose ([webship/workspace#835](https://github.com/webship/workspace/issues/835)): the builder takes
+  `--runtime podman`, and nothing of it was run there yet.
 
 The same commands work on every runtime: `cmd-tools-mautic-cli.sh`, `cmd-tools-add-users.sh`,
 `cmd-tools-testing.sh`.
@@ -248,9 +252,6 @@ test content (`administrator`), the users registry (the handles above, overridab
 of a normal run, and the site's address in place of the starter's `http://localhost:8080`. It places
 `tests/features/site.feature` when the project has none, and makes sure the default accounts are on the site. Run it
 again and it adds what is missing and keeps what you changed.
-
-Until `@webship-js/mautic-steps` is on npm, give the testing setup its tarball (`npm pack` of the pack) with
-`bash cmd-tools-testing.sh mysite --add-steps <path to the tarball>`, then run the setup again.
 
 A scenario of your own reads like this one, from the step pack's phrases (the skill `mautic-scenarios` lists them by
 area):
