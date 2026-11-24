@@ -323,6 +323,14 @@ function site_content($models, $em, string $root): void
     foreach ($contacts as [$first, $last, $email, $city, $points, $owner, $tags, $stageName, $atCompany]) {
         $lead = $leads->getRepository()->findOneBy(['email' => $email]);
         if ($lead) {
+            // A contact that is there stays as it is, but gets its owner back: cancelling the default accounts leaves
+            // their contacts without one, and adding them again makes new accounts.
+            $user = $owner ? site_user($models, $owner) : null;
+            if ($user && (!$lead->getOwner() || $lead->getOwner()->getId() !== $user->getId())) {
+                $lead->setOwner($user);
+                $leads->saveEntity($lead);
+                echo "Contact {$first} {$last}: its owner {$owner} again\n";
+            }
             continue;
         }
         $lead = new \Mautic\LeadBundle\Entity\Lead();

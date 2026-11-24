@@ -203,7 +203,7 @@ bash cmd-tools-mautic-cli.sh mysite --scheduled-tasks --every 15       # again a
 bash cmd-tools-mautic-cli.sh mysite --sample-content                   # the sample content, on a site without it
 bash cmd-tools-mautic-cli.sh mysite --tidy                             # remove the test content a stopped run left ("Webship test …"), lift a login lock
 bash cmd-tools-mautic-cli.sh mysite --add-users                        # the default accounts and their roles
-bash cmd-tools-mautic-cli.sh mysite --cancel-users                     # delete them again
+bash cmd-tools-mautic-cli.sh mysite --cancel-users                     # delete them again (their contacts lose their owner)
 ```
 
 `--run` hands its words to `bin/console` in the site's folder. A new release of the site is a new build
@@ -220,7 +220,9 @@ bash cmd-tools-mautic-cli.sh mysite --cancel-users                     # delete 
 Each account has the password of the workspace's other default lists and logs in with its user name. They are made
 by the plugin's script through the site's own models, the accounts on PHP's standard input (never on a command line
 or in a file); an account that is there already gets its names, its address, its password and its role back.
-Cancelling deletes them; the contacts they own stay, without an owner. An account of your own, and the workspace
+Cancelling deletes them; the contacts they own stay, without an owner, until the accounts and the sample content are
+added again (`--add-users`, then `--sample-content`, which gives each sample contact its owner back: a sales account
+sees only the contacts it owns). An account of your own, and the workspace
 account, stay when the default accounts are added or cancelled. They are for local sites and for tests.
 
 The row's Tests menu offers **Add the test users** and **Cancel the test users** for a site this plugin claims: they

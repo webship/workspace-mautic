@@ -13,11 +13,11 @@ parser.add_argument('-a', '--add-users',
 parser.add_argument('-c', '--cancel-users',
                     action='store_true',
                     default=False,
-                    help='Delete the default accounts (never the workspace account, the administrator the installer made); the contacts they own stay.')
+                    help='Delete the default accounts (never the workspace account, the administrator the installer made); the contacts they own stay, without an owner, until the accounts and the sample content are added again (--add-users, then --sample-content).')
 parser.add_argument('-s', '--sample-content',
                     action='store_true',
                     default=False,
-                    help='Add the sample content the step pack is tested on (and the default accounts, which own its contacts). What is there already stays as it is.')
+                    help='Add the sample content the step pack is tested on (and the default accounts, which own its contacts). What is there already stays as it is; a sample contact gets its owner back.')
 parser.add_argument('-t', '--tidy',
                     action='store_true',
                     default=False,

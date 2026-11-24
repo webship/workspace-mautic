@@ -69,7 +69,7 @@ bash cmd-tools-mautic-cli.sh mysite --scheduled-tasks --every 15       # again a
 bash cmd-tools-mautic-cli.sh mysite --sample-content                   # the sample content, on a site without it
 bash cmd-tools-mautic-cli.sh mysite --tidy                             # remove the test content a stopped run left ("Webship test …"), lift a login lock
 bash cmd-tools-mautic-cli.sh mysite --add-users                        # the default accounts and their roles
-bash cmd-tools-mautic-cli.sh mysite --cancel-users                     # delete them again
+bash cmd-tools-mautic-cli.sh mysite --cancel-users                     # delete them again (their contacts lose their owner)
 ```
 
 The row's Tests menu on the dashboard offers the test users of a site this plugin claims (its
@@ -84,7 +84,9 @@ The row's Tests menu on the dashboard offers the test users of a site this plugi
 | `marketer` | `marketer@example.com` | Marketer: contacts, segments, components, channels, campaigns, points, stages, reports; not the users or the settings |
 | `sales` | `sales@example.com` | Sales: the contacts it owns and their notes |
 
-Each account has the password of the workspace's other default lists and logs in with its user name.
+Each account has the password of the workspace's other default lists and logs in with its user name. Cancelling them
+leaves their contacts without an owner: `--add-users`, then `--sample-content`, gives each sample contact its owner
+back.
 
 ## Rules
 

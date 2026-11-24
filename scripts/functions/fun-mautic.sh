@@ -422,7 +422,8 @@ function add_mautic_users() {
 }
 
 # Delete the default accounts (never the workspace account, the administrator the installer made). The contacts they
-# own stay, without an owner.
+# own stay, without an owner, until the accounts and the sample content are added again (the content verb gives each
+# sample contact its owner back).
 function cancel_mautic_users() {
   mautic_enter_project || return 1 ;
   local user user_name ;
