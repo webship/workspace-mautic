@@ -246,15 +246,26 @@ function mautic_is_running() {
   ddev describe -j 2>/dev/null | grep -q '"status":"running"' ;
 }
 
+# The SHA-256 sum of a release package, as its publisher gives it: the digest of the release's asset on GitHub
+# (api.github.com/repos/mautic/mautic/releases/tags/<release>). A release named here needs no call to that API, which a
+# shared machine or a CI runner can find rate-limited; the sum of another release is asked of it.
+function mautic_known_sum() {
+  case "$1" in
+    7.2.2) echo 'e156b290bf4a17f3e5ec05966715a43c8956504efd0df0752cdc13048030a191' ;;
+  esac
+}
+
 # Fetch the release package in the web container, check it against the SHA-256 sum its publisher gives for it (the
-# digest of the release's asset), and unpack it in mautic/.
+# digest of the release's asset: the one this plugin knows, else the one the release's API gives), and unpack it in
+# mautic/.
 function mautic_download() {
   local version="$1" root="$2" ;
   local package="https://github.com/mautic/mautic/releases/download/${version}/${version}.zip" ;
   local api="https://api.github.com/repos/mautic/mautic/releases/tags/${version}" ;
   ddev exec "set -e; cd /tmp && curl -sSfL --retry 3 -o mautic.zip '${package}' \
-    && curl -sSfL --retry 3 -H 'Accept: application/vnd.github+json' -o mautic-release.json '${api}' \
-    && SUM=\$(php -r '\$r = json_decode(file_get_contents(\"mautic-release.json\"), true); foreach (\$r[\"assets\"] as \$a) { if (\$a[\"name\"] === \"${version}.zip\") { echo substr(\$a[\"digest\"], 7); } }') \
+    && SUM='$(mautic_known_sum "${version}")' \
+    && if [ -z \"\$SUM\" ]; then curl -sSfL --retry 5 --retry-all-errors --retry-delay 15 -H 'Accept: application/vnd.github+json' -o mautic-release.json '${api}' \
+         && SUM=\$(php -r '\$r = json_decode(file_get_contents(\"mautic-release.json\"), true); foreach (\$r[\"assets\"] as \$a) { if (\$a[\"name\"] === \"${version}.zip\") { echo substr(\$a[\"digest\"], 7); } }'); fi \
     && test -n \"\$SUM\" && echo \"\$SUM  mautic.zip\" | sha256sum -c - \
     && mkdir -p '${root}' && unzip -q -o mautic.zip -d '${root}' && rm -f mautic.zip mautic-release.json" < /dev/null ;
 }

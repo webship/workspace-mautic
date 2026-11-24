@@ -169,6 +169,19 @@ test('the builder refuses what it cannot build before it changes anything', () =
   assert.ok(!fs.existsSync(log), 'the container tool was never called');
 });
 
+test('the release the builder installs by default has its sum here: no call to the release API, which a CI runner can find rate-limited', () => {
+  const pinned = bash('mautic_known_sum "${MAUTIC_DEFAULT_VERSION}"');
+  assert.match(pinned.stdout.trim(), /^[0-9a-f]{64}$/, 'the SHA-256 sum of the default release');
+  const log = path.join(fs.mkdtempSync(path.join(os.tmpdir(), 'mautic-plugin-')), 'ddev.log');
+  bash('mautic_download "${MAUTIC_DEFAULT_VERSION}" /var/www/html/mautic', { DDEV_LOG: log });
+  const call = fs.readFileSync(log, 'utf8').split('\n')[0];
+  assert.ok(call.includes(`SUM='${pinned.stdout.trim()}'`), 'the download is checked against the sum it knows');
+  bash('mautic_download 7.1.0 /var/www/html/mautic', { DDEV_LOG: log });
+  const other = fs.readFileSync(log, 'utf8').split('\n').filter((l) => l.startsWith('ddev exec'))[1];
+  assert.ok(other.includes("SUM=''") && other.includes('https://api.github.com/repos/mautic/mautic/releases/tags/7.1.0'), 'another release asks the API, with retries');
+  assert.match(other, /--retry 5 --retry-all-errors/);
+});
+
 test('the builder writes the claim of the plugin: the release, and the scheduled tasks as a daemon of the web container', () => {
   const p = project('drupal');
   const r = bash(`mautic_write_claim ${p.dir} 7.2.2`);
